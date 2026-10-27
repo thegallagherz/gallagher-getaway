@@ -1343,10 +1343,10 @@
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-27T04:33:18Z">2026-10-27T04:33:18Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-27T04:39:42Z">2026-10-27T04:39:42Z</time></p></div>
           <div class="budget-file-save">
-            <button type="button" class="budget-save-file" id="connect-trip-file">Save to Google Drive</button>
-            <span class="budget-file-status" id="trip-file-status" role="status">On first save, select the Google Drive copy; future saves use it automatically.</span>
+            <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
+            <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
           </div>
         </div>
         <section class="budget-section" aria-labelledby="admin-flight-price-title">
@@ -1603,9 +1603,6 @@
     ];
 
     const budgetStorageKey = "gallaghers-getaway-budget-v1";
-    const fileHandleDatabase = "gallaghers-getaway-file";
-    const fileHandleStore = "handles";
-    const fileHandleKey = "trip-html-google-drive";
     const tripDates = [...new Set(itinerary.map((item) => item.date))];
     const tripYear = 2027;
     const activityDates = tripDates;
@@ -1661,110 +1658,128 @@
     });
 
     let budgetStorageWarning = "";
-    let tripFileHandle = null;
-    let tripFileSaveQueue = Promise.resolve();
 
-    function openFileHandleDatabase() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(fileHandleDatabase, 1);
-        request.onupgradeneeded = () => request.result.createObjectStore(fileHandleStore);
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-      });
+    const githubHost = location.hostname.endsWith(".github.io");
+    const githubRepo = githubHost
+      ? {owner:location.hostname.split(".")[0], name:location.pathname.split("/")[1]}
+      : {owner:"thegallagherz", name:"gallagher-getaway"};
+    const githubTokenKey = "gallagher-getaway-github-token";
+    const githubShaKey = "gallagher-getaway-github-sha";
+    const githubDirtyKey = "gallagher-getaway-github-dirty";
+    const githubFileUrl = `https://api.github.com/repos/${githubRepo.owner}/${githubRepo.name}/contents/trip-choices.json`;
+    let githubSaveTimer = null;
+    let githubSaveQueue = Promise.resolve();
+
+    function githubToken() {
+      return localStorage.getItem(githubTokenKey) || "";
     }
 
-    async function storeTripFileHandle(handle) {
-      const database = await openFileHandleDatabase();
-      try {
-        await new Promise((resolve, reject) => {
-          const request = database.transaction(fileHandleStore, "readwrite").objectStore(fileHandleStore).put(handle, fileHandleKey);
-          request.onsuccess = resolve;
-          request.onerror = () => reject(request.error);
-        });
-      } finally {
-        database.close();
-      }
+    function githubHeaders() {
+      const headers = {Accept:"application/vnd.github+json"};
+      if (githubToken()) headers.Authorization = `Bearer ${githubToken()}`;
+      return headers;
     }
 
-    async function restoreTripFileHandle() {
-      const database = await openFileHandleDatabase();
-      try {
-        return await new Promise((resolve, reject) => {
-          const request = database.transaction(fileHandleStore, "readonly").objectStore(fileHandleStore).get(fileHandleKey);
-          request.onsuccess = () => resolve(request.result || null);
-          request.onerror = () => reject(request.error);
-        });
-      } finally {
-        database.close();
-      }
-    }
-
-    function setTripFileStatus(message, isError = false, isSuccess = false) {
+    function setSyncStatus(message, state = "") {
       const status = document.querySelector("#trip-file-status");
-      const saveButton = document.querySelector("#connect-trip-file");
+      const button = document.querySelector("#connect-github");
       status.textContent = message;
-      status.style.color = isError ? "#98532f" : "";
-      saveButton.classList.toggle("is-saved", isSuccess);
-      saveButton.textContent = isSuccess ? "✓ Saved · Save again" : "Save to Google Drive";
+      status.style.color = state === "error" ? "#98532f" : "";
+      button.classList.toggle("is-saved", state === "saved");
+      button.textContent = githubToken() ? (state === "saved" ? "✓ Auto-save on" : "GitHub connected") : "Connect GitHub to save";
     }
 
-    function serializedTripFile() {
-      const copy = document.documentElement.cloneNode(true);
-      copy.querySelector("#saved-trip-choices").textContent = JSON.stringify(budget).replace(/</g, "\\u003c");
-      return `<!doctype html>\n${copy.outerHTML}`;
+    function encodeBase64(text) {
+      return btoa(String.fromCharCode(...new TextEncoder().encode(text)));
     }
 
-    async function writeTripFile() {
-      if (!tripFileHandle) return;
-      const permission = await tripFileHandle.queryPermission({mode:"readwrite"});
-      if (permission !== "granted") {
-        setTripFileStatus("File access needs approval. Click the button to reconnect.", true);
-        return;
+    function decodeBase64(text) {
+      return new TextDecoder().decode(Uint8Array.from(atob(text.replace(/\s/g, "")), (character) => character.charCodeAt(0)));
+    }
+
+    async function fetchGithubChoices() {
+      const response = await fetch(`${githubFileUrl}?t=${Date.now()}`, {headers:githubHeaders(), cache:"no-store"});
+      if (response.status === 404) return null;
+      if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
+      const file = await response.json();
+      return {sha:file.sha, text:decodeBase64(file.content)};
+    }
+
+    async function pushGithubChoices() {
+      if (!githubToken()) return;
+      const text = JSON.stringify(budget);
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const remote = await fetchGithubChoices();
+        const response = await fetch(githubFileUrl, {
+          method:"PUT",
+          headers:{...githubHeaders(), "Content-Type":"application/json"},
+          body:JSON.stringify({message:"Update trip choices", content:encodeBase64(text), ...(remote ? {sha:remote.sha} : {})})
+        });
+        if (response.ok) {
+          const result = await response.json();
+          localStorage.setItem(githubShaKey, result.content.sha);
+          localStorage.removeItem(githubDirtyKey);
+          setSyncStatus(`Saved to GitHub at ${new Date().toLocaleTimeString([], {timeStyle:"short"})}.`, "saved");
+          return;
+        }
+        if (response.status === 401 || response.status === 403 || response.status === 404) {
+          throw new Error("Your GitHub token cannot write to this trip. Reconnect with a valid token.");
+        }
       }
-      const writable = await tripFileHandle.createWritable();
+      throw new Error("Another change was saved at the same time. Your next change will retry.");
+    }
+
+    function queueGithubSave() {
+      if (!githubToken()) return;
+      localStorage.setItem(githubDirtyKey, "1");
+      setSyncStatus("Saving…");
+      clearTimeout(githubSaveTimer);
+      githubSaveTimer = setTimeout(() => {
+        githubSaveQueue = githubSaveQueue.then(pushGithubChoices).catch((error) => {
+          console.error("Could not save trip choices to GitHub.", error);
+          setSyncStatus(error.message || "Could not save to GitHub. Changes are kept in this browser and will retry on your next change.", "error");
+        });
+      }, 1500);
+    }
+
+    async function connectGithub() {
+      const entered = prompt("Paste your GitHub access token (it stays in this browser only). To create one: GitHub > Settings > Developer settings > Fine-grained tokens, choose the gallagher-getaway repository, and set Contents to Read and write.");
+      if (!entered) return;
+      localStorage.setItem(githubTokenKey, entered.trim());
       try {
-        await writable.write(serializedTripFile());
-        await writable.close();
-        setTripFileStatus(`Saved choices to ${tripFileHandle.name}.`, false, true);
+        const response = await fetch(`https://api.github.com/repos/${githubRepo.owner}/${githubRepo.name}`, {headers:githubHeaders()});
+        const repo = response.ok ? await response.json() : null;
+        if (!repo?.permissions?.push) throw new Error("no push access");
+        setSyncStatus("GitHub connected. Saving your current choices…");
+        localStorage.setItem(githubDirtyKey, "1");
+        await pushGithubChoices();
       } catch (error) {
-        await writable.abort();
-        throw error;
+        localStorage.removeItem(githubTokenKey);
+        setSyncStatus("That token cannot save to this trip. Check that it has Contents: Read and write on the gallagher-getaway repository.", "error");
       }
-    }
-    function queueTripFileWrite() {
-      const pendingSave = tripFileSaveQueue.then(writeTripFile);
-      tripFileSaveQueue = pendingSave.catch((error) => {
-        console.error("Could not save trip choices to the selected file.", error);
-        setTripFileStatus("Could not save to the selected file. Reconnect it and try again.", true);
-      });
-      return tripFileSaveQueue;
     }
 
-    async function chooseTripFile() {
-      if (!window.showOpenFilePicker) {
-        setTripFileStatus("This browser cannot save directly to a local file. Open the app in a supported desktop browser to connect the Google Drive copy.", true);
-        return false;
+    async function pullGithubChoices() {
+      try {
+        const remote = await fetchGithubChoices();
+        if (!remote) return setSyncStatus(githubToken() ? "Auto-save is on. Your first change creates the shared file." : "View only. Connect GitHub to save changes.", githubToken() ? "" : "error");
+        if (githubToken() && localStorage.getItem(githubDirtyKey)) {
+          await pushGithubChoices();
+          return;
+        }
+        if (remote.sha !== localStorage.getItem(githubShaKey)) {
+          localStorage.setItem(githubShaKey, remote.sha);
+          if (remote.text !== localStorage.getItem(budgetStorageKey)) {
+            localStorage.setItem(budgetStorageKey, remote.text);
+            location.reload();
+            return;
+          }
+        }
+        setSyncStatus(githubToken() ? "Auto-save is on. Changes save to GitHub automatically." : "View only. Connect GitHub to save changes.", githubToken() ? "saved" : "");
+      } catch (error) {
+        console.error("Could not load trip choices from GitHub.", error);
+        setSyncStatus("Could not reach GitHub. Showing the choices saved in this browser.", "error");
       }
-      const [handle] = await window.showOpenFilePicker({
-        multiple:false,
-        types:[{description:"Gallaghers Getaway HTML",accept:{"text/html":[".html"]}}]
-      });
-      const contents = await (await handle.getFile()).text();
-      if (!contents.includes("<title>Gallaghers Getaway</title>") || !contents.includes('id="saved-trip-choices"')) {
-        setTripFileStatus("That file does not look like Gallaghers Getaway. No changes were made.", true);
-        return false;
-      }
-      let permission = await handle.queryPermission({mode:"readwrite"});
-      if (permission !== "granted") permission = await handle.requestPermission({mode:"readwrite"});
-      if (permission !== "granted") {
-        setTripFileStatus("Write permission was not granted, so the file was not changed.", true);
-        return false;
-      }
-      tripFileHandle = handle;
-      await storeTripFileHandle(handle);
-      setTripFileStatus(`Connected: ${handle.name}. Future saves go to the selected file.`);
-      await queueTripFileWrite();
-      return true;
     }
     function loadBudget() {
       const empty = blankBudget();
@@ -2484,9 +2499,7 @@
         message.hidden = !budgetStorageWarning;
         message.textContent = budgetStorageWarning;
       }
-      if (tripFileHandle) {
-        queueTripFileWrite();
-      }
+      queueGithubSave();
     }
 
     function renderBudget() {
@@ -2775,39 +2788,10 @@
       renderBudget();
       renderAdminPrices();
     });
-    document.querySelector("#connect-trip-file").addEventListener("click", async () => {
-      try {
-        if (!tripFileHandle) tripFileHandle = await restoreTripFileHandle();
-        if (!tripFileHandle) return await chooseTripFile();
-        let permission = await tripFileHandle.queryPermission({mode:"readwrite"});
-        if (permission !== "granted") permission = await tripFileHandle.requestPermission({mode:"readwrite"});
-        if (permission !== "granted") {
-          setTripFileStatus("Write permission was not granted, so the file was not changed.", true);
-          return;
-        }
-        await queueTripFileWrite();
-      } catch (error) {
-        if (error.name === "AbortError") return;
-        console.error("Could not save choices to the connected trip file.", error);
-        setTripFileStatus("Could not save to the connected file. Check browser permissions and try again.", true);
-      }
-    });
+    document.querySelector("#connect-github").addEventListener("click", connectGithub);
     document.querySelector("#search").addEventListener("input", renderTimeline);
     document.querySelector("#city-filter").addEventListener("change", renderTimeline);
     document.querySelector("#activity-filter").addEventListener("change", renderActivities);
-    restoreTripFileHandle().then(async (handle) => {
-      if (!handle) {
-        setTripFileStatus("On first save, select the Google Drive copy; future saves use it automatically.");
-        return;
-      }
-      tripFileHandle = handle;
-      const permission = await handle.queryPermission({mode:"readwrite"});
-      setTripFileStatus(permission === "granted" ? `Connected: ${handle.name}. Future saves go to the selected file.` : "File connection found; click Save choices to approve access again.");
-      if (budgetScheduleNeedsMigration && permission === "granted") saveBudget();
-    }).catch((error) => {
-      console.error("Could not restore the selected trip file.", error);
-      setTripFileStatus("Could not restore the file connection. Click to select the file again.", true);
-    });
     const publishedTime = document.querySelector("#last-published-time");
     const publishedDate = new Date(publishedTime.getAttribute("datetime"));
     publishedTime.textContent = Number.isNaN(publishedDate.getTime()) ? "Not yet published" : publishedDate.toLocaleString([], {dateStyle:"medium", timeStyle:"short"});
@@ -2819,6 +2803,7 @@
     renderBudget();
     renderAdminPrices();
     if (budgetScheduleNeedsMigration || moduleTagsMigrated) saveBudget();
+    pullGithubChoices();
   </script>
 
 
