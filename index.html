@@ -1343,7 +1343,7 @@
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-27T04:39:42Z">2026-10-27T04:39:42Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-27T04:41:37Z">2026-10-27T04:41:37Z</time></p></div>
           <div class="budget-file-save">
             <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
             <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
@@ -1685,8 +1685,8 @@
       const button = document.querySelector("#connect-github");
       status.textContent = message;
       status.style.color = state === "error" ? "#98532f" : "";
-      button.classList.toggle("is-saved", state === "saved");
-      button.textContent = githubToken() ? (state === "saved" ? "✓ Auto-save on" : "GitHub connected") : "Connect GitHub to save";
+      button.hidden = Boolean(githubToken());
+      button.textContent = "Connect GitHub to save";
     }
 
     function encodeBase64(text) {
