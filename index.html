@@ -325,6 +325,50 @@
   </style>
 </head>
 <body>
+  <div id="password-gate" style="position:fixed;inset:0;z-index:99999;background:#f5f3ed;display:flex;align-items:center;justify-content:center;padding:20px;">
+    <form id="password-form" style="background:#fffefa;border:1px solid #d9d6cb;border-radius:14px;max-width:340px;padding:26px;text-align:center;width:100%;">
+      <h1 style="font-family:Georgia,serif;font-size:24px;font-weight:500;margin:0 0 6px;">Gallaghers Getaway</h1>
+      <p style="color:#3f4a43;font-size:14px;margin:0 0 14px;">Enter the password to continue.</p>
+      <input id="password-input" type="password" autocomplete="current-password" aria-label="Password" style="border:1px solid #bbb;border-radius:8px;box-sizing:border-box;font-size:16px;padding:10px;width:100%;">
+      <p id="password-error" role="alert" style="color:#98532f;font-size:13px;margin:8px 0 0;min-height:18px;"></p>
+      <button type="submit" style="background:#245943;border:0;border-radius:10px;color:#fff;cursor:pointer;font-size:14px;font-weight:700;margin-top:6px;padding:10px 18px;">Enter</button>
+    </form>
+  </div>
+  <script>
+    (function () {
+      const gate = document.getElementById("password-gate");
+      const expected = "6a896470e0c0e7c4640538cfc3b22d73abfbbe7b8c27ad53aa792984b6f2c20a";
+      const storeKey = "gallagher-getaway-unlocked";
+      const hash = async (text) => {
+        const data = new TextEncoder().encode("gallagher-getaway:" + text);
+        const digest = await crypto.subtle.digest("SHA-256", data);
+        return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+      };
+      try { if (localStorage.getItem(storeKey) === expected) { gate.remove(); return; } } catch (error) {}
+      document.documentElement.style.overflow = "hidden";
+      const unlock = () => { document.documentElement.style.overflow = ""; gate.remove(); };
+      try {
+        const token = localStorage.getItem("gallagher-getaway-github-token");
+        if (token) {
+          fetch("https://api.github.com/repos/thegallagherz/gallagher-getaway", {headers:{Authorization:"Bearer " + token, Accept:"application/vnd.github+json"}})
+            .then((response) => response.ok ? response.json() : null)
+            .then((repo) => { if (repo && repo.permissions && repo.permissions.push) unlock(); })
+            .catch(() => {});
+        }
+      } catch (error) {}
+      document.getElementById("password-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const error = document.getElementById("password-error");
+        try {
+          if (await hash(document.getElementById("password-input").value.trim()) === expected) {
+            try { localStorage.setItem(storeKey, expected); } catch (e) {}
+            document.documentElement.style.overflow = "";
+            gate.remove();
+          } else error.textContent = "That password is not right.";
+        } catch (e) { error.textContent = "This browser cannot check the password."; }
+      });
+    })();
+  </script>
   <header class="topbar">
     <div class="brand"><span class="brand-mark" role="img" aria-label="Irish flag"><span class="flag-green"></span><span class="flag-white"></span><span class="flag-orange"></span></span><span>GALLAGHERS GETAWAY</span></div>
     <div class="topbar-note">A little room for the unexpected</div>
@@ -1318,7 +1362,7 @@
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:27:11Z">2026-10-28T00:27:11Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:33:14Z">2026-10-28T00:33:14Z</time></p></div>
           <div class="budget-file-save">
             <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
             <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
