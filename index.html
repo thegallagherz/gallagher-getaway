@@ -1362,7 +1362,7 @@
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:33:14Z">2026-10-28T00:33:14Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:40:32Z">2026-10-28T00:40:32Z</time></p></div>
           <div class="budget-file-save">
             <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
             <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
@@ -2901,7 +2901,7 @@
     let irelandDate = null;
     let irelandSuggestion = "";
     const suggestionRules = {
-      "do": {title:"What should we do next?", match:(a) => !/^(bar|restaurant)/i.test(a.category)},
+      "do": {title:"What should we do next?", match:(a) => !/^(bar|restaurant)|\bpub\b/i.test(a.category)},
       "eat": {title:"Where should we eat?", match:(a) => /^restaurant/i.test(a.category)},
       "pint": {title:"Where should we grab a pint?", match:(a) => /^bar/i.test(a.category)}
     };
@@ -2912,9 +2912,18 @@
       return tripDates.includes(label) ? label : tripDates[0];
     }
 
+    function isCommitted(activity) {
+      if (activity.timelineId) return true;
+      if (budget.interests.activities[activity.id] === "interested" && budget.activities[activity.id]?.date) return true;
+      const norm = (text) => String(text || "").toLowerCase().replace(/[’']/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+      const name = norm(activity.name).replace(/^the /, "");
+      if (name.length < 4) return false;
+      return itinerary.some((item) => norm(`${item.title} ${item.place || ""}`).includes(name));
+    }
+
     function irelandPicks(kind, city, count) {
       const rule = suggestionRules[kind];
-      const pool = activities.filter((a) => a.city === city && rule.match(a) && budget.interests.activities[a.id] !== "not-interested");
+      const pool = activities.filter((a) => a.city === city && rule.match(a) && budget.interests.activities[a.id] !== "not-interested" && !isCommitted(a));
       const shuffled = pool.map((a) => [Math.random(), a]).sort((x, y) => x[0] - y[0]).map((x) => x[1]);
       return shuffled.slice(0, count);
     }
