@@ -2,9 +2,13 @@
 <html lang="en"><head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f3ed">
+  <meta name="theme-color" content="#245943">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
   <title>Gallaghers Getaway</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
   <style>
     :root {
       color-scheme: light;
@@ -74,6 +78,26 @@
     .ireland-faq details { border-top: 1px solid var(--line); padding: 8px 0; }
     .ireland-faq summary { cursor: pointer; font-size: 13px; font-weight: 700; }
     @media (max-width: 720px) { .ireland-grid { grid-template-columns: 1fr; } }
+    .offline-banner { background: #fff1d6; border: 1px solid #ecc67a; border-radius: 10px; color: #5c3f00; font-size: 13px; margin: 0 0 10px; padding: 9px 12px; }
+    .ireland-card a.map-link { color: #245943; font-size: 13px; font-weight: 700; }
+    .ireland-days .today-btn { background: #fde6d0; border-color: #f0c39b; font-weight: 700; }
+    @media (max-width: 720px) {
+      body.mode-ireland .shell { padding-left: 12px; padding-right: 12px; }
+      body.mode-ireland .topbar { padding-left: 12px; padding-right: 12px; }
+      body.mode-ireland .topbar-note, body.mode-ireland .brand span:last-child { display: none; }
+      .mode-toggle { margin-left: 0; width: 100%; }
+      .mode-toggle button { flex: 1; font-size: 14px; padding: 10px 8px; }
+      .topbar { flex-wrap: wrap; gap: 8px; }
+      .ireland-days { flex-wrap: nowrap; margin: 8px -12px; overflow-x: auto; padding: 4px 12px; position: sticky; scroll-snap-type: x proximity; top: 0; z-index: 5; background: var(--paper); -webkit-overflow-scrolling: touch; }
+      .ireland-days button { flex: 0 0 auto; font-size: 14px; min-height: 44px; padding: 8px 14px; scroll-snap-align: start; }
+      .ireland-actions { display: grid; gap: 8px; grid-template-columns: 1fr; }
+      .ireland-actions button { font-size: 16px; min-height: 52px; width: 100%; }
+      .ireland-card { padding: 14px; }
+      .ireland-card p, .ireland-item strong, .ireland-faq summary { font-size: 15px; }
+      .ireland-faq summary { padding: 6px 0; }
+      .ireland-card a.map-link { align-items: center; display: inline-flex; min-height: 44px; }
+      .ireland-card .budget-clear { min-height: 44px; }
+    }
 
     .shell { margin: 0 auto; max-width: 1180px; padding: 42px 24px 70px; }
     .hero {
@@ -414,6 +438,7 @@
           <p class="section-subtitle" id="ireland-subtitle"></p>
         </div>
         <div class="ireland-days" id="ireland-days" role="group" aria-label="Choose a day"></div>
+        <div class="offline-banner" id="offline-banner" role="status" hidden>You’re offline. Showing the plan saved on this device; links and changes need a connection.</div>
         <div class="ireland-actions" role="group" aria-label="Suggestions">
           <button type="button" data-suggest="do" aria-pressed="false">What should we do next?</button>
           <button type="button" data-suggest="eat" aria-pressed="false">Where should we eat?</button>
@@ -1362,7 +1387,7 @@
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:40:32Z">2026-10-28T00:40:32Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:42:46Z">2026-10-28T00:42:46Z</time></p></div>
           <div class="budget-file-save">
             <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
             <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
@@ -2944,15 +2969,16 @@
       const info = irelandInfo[city];
       document.querySelector("#ireland-title").textContent = `We’re in ${city}`;
       document.querySelector("#ireland-subtitle").textContent = `${dayLabel(irelandDate)} · ${irelandDate}`;
-      document.querySelector("#ireland-days").innerHTML = tripDates.map((date) => `<button type="button" data-ireland-date="${escapeHtml(date)}" aria-pressed="${date === irelandDate}">${escapeHtml(date)}</button>`).join("");
+      document.querySelector("#ireland-days").innerHTML = `<button type="button" class="today-btn" data-ireland-date="${escapeHtml(irelandToday())}">Today</button>` + tripDates.map((date) => `<button type="button" data-ireland-date="${escapeHtml(date)}" aria-pressed="${date === irelandDate}">${escapeHtml(date)}</button>`).join("");
+      const mapLink = (query) => query ? `<p><a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}" target="_blank" rel="noopener noreferrer">Open in Maps ↗</a></p>` : "";
       const today = itinerary.filter((item) => item.date === irelandDate);
       const scheduled = activities.filter((a) => budget.interests.activities[a.id] === "interested" && budget.activities[a.id]?.date === irelandDate && !a.timelineId);
       const stay = hotelForNight(irelandDate);
-      const itemHtml = today.map((item) => `<div class="ireland-item"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml([item.time, item.place].filter(Boolean).join(" · "))}</p><p>${escapeHtml(item.details || "")}</p></div>`).join("")
-        + scheduled.map((a) => `<div class="ireland-item"><strong>${escapeHtml(a.name)}</strong><p>${escapeHtml(a.category)} · ${escapeHtml(a.location || "")}</p></div>`).join("");
+      const itemHtml = today.map((item) => `<div class="ireland-item"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml([item.time, item.place].filter(Boolean).join(" · "))}</p><p>${escapeHtml(item.details || "")}</p>${item.place && item.city !== "Travel" ? mapLink(`${item.place}, ${item.city}, Ireland`) : ""}</div>`).join("")
+        + scheduled.map((a) => `<div class="ireland-item"><strong>${escapeHtml(a.name)}</strong><p>${escapeHtml(a.category)} · ${escapeHtml(a.location || "")}</p>${mapLink(`${a.name} ${a.location || ""}`)}</div>`).join("");
       document.querySelector("#ireland-content").innerHTML = `
         <div class="ireland-card ireland-wide"><h3>Today’s plan</h3>${itemHtml || "<p>Nothing planned for this day.</p>"}</div>
-        <div class="ireland-card"><h3>Where you’re staying</h3>${stay ? `<p><strong>${escapeHtml(stay.name)}</strong></p><p>${escapeHtml(stay.location || "")}</p><p>${escapeHtml(stay.dates)}</p>` : "<p>No hotel marked Interested for tonight.</p>"}</div>
+        <div class="ireland-card"><h3>Where you’re staying</h3>${stay ? `<p><strong>${escapeHtml(stay.name)}</strong></p><p>${escapeHtml(stay.location || "")}</p><p>${escapeHtml(stay.dates)}</p>${mapLink(`${stay.name} ${stay.location || ""}`)}` : "<p>No hotel marked Interested for tonight.</p>"}</div>
         <div class="ireland-card"><h3>About ${escapeHtml(city)}</h3><p>${escapeHtml(info.about)}</p></div>
         <div class="ireland-card ireland-wide ireland-faq"><h3>${escapeHtml(city)} FAQs</h3>${info.faqs.map(([q, a]) => `<details><summary>${escapeHtml(q)}</summary><p>${escapeHtml(a)}</p></details>`).join("")}</div>`;
       renderSuggestions();
@@ -2983,6 +3009,13 @@
       else if (event.target.closest("[data-suggest-more]")) renderSuggestions();
     });
     try { if (localStorage.getItem("gallagher-getaway-mode") === "ireland") setMode("ireland"); } catch (error) {}
+    const updateOnlineState = () => { document.querySelector("#offline-banner").hidden = navigator.onLine; };
+    window.addEventListener("online", updateOnlineState);
+    window.addEventListener("offline", updateOnlineState);
+    updateOnlineState();
+    if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    }
   </script>
 
 
