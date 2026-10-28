@@ -249,6 +249,11 @@
     .event[data-city="galway"] .event-drag-handle { color: #cfe3d6; }
     .event[data-city="galway"] .event-order-button { border-color: #86a893; color: #e3efe7; }
     .event[data-city="galway"] .free-time-choice { color: #fff; }
+    .event[data-city="galway"] .event-remove-button { border-color: #f0c39b; color: #ffd9b8; }
+    .event[data-city="galway"] .event-remove-button:hover { background: #2f5440; }
+    .event[data-city="dublin"] .event-details, .event[data-city="dublin"] .event-time, .event[data-city="dublin"] .event-city, .event[data-city="dublin"] .event-order-button, .event[data-city="dublin"] .event-schedule,
+    .event[data-city="mayo"] .event-details, .event[data-city="mayo"] .event-time, .event[data-city="mayo"] .event-city, .event[data-city="mayo"] .event-order-button, .event[data-city="mayo"] .event-schedule { color: #3f4a43; }
+    .event[data-city="dublin"] .event-drag-handle, .event[data-city="mayo"] .event-drag-handle { color: #5a665e; }
     .event[data-city="mayo"] { background: #eef0f2; border-color: #cfd3d8; }
     .event-tag-select, .event-schedule select, .activity-schedule select, .budget-input, .budget-day-select {
       background-color: #fffefa; color: var(--ink);
@@ -1272,7 +1277,7 @@
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:20:20Z">2026-10-28T00:20:20Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:21:53Z">2026-10-28T00:21:53Z</time></p></div>
           <div class="budget-file-save">
             <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
             <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
