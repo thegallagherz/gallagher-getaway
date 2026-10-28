@@ -1103,11 +1103,10 @@
           <div><div class="section-kicker">Plan the spend</div><h2>Trip budget</h2><p class="section-subtitle">Pick hotel options, add activity estimates, and plan extra spending day by day. Your choices save in this browser.</p></div>
         </div>
         <div class="budget-summary" id="budget-summary" aria-live="polite">
-        <div class="budget-total"><div class="stat-label">Proposed total</div><div class="stat-value">$5,207.61</div><div class="budget-line-note">Flights + interested hotels + interested activities + daily spending</div></div>
+        <div class="budget-total"><div class="stat-label">Proposed total</div><div class="stat-value">$5,207.61</div><div class="budget-line-note">Flights + interested hotels + interested activities</div></div>
         <div class="stat"><div class="stat-label">Flights · 2 people</div><div class="stat-value">$3,225.58</div></div>
         <div class="stat"><div class="stat-label">Interested hotels</div><div class="stat-value">$1,387.17</div></div>
-        <div class="stat"><div class="stat-label">Interested activities</div><div class="stat-value">$594.86</div></div>
-        <div class="stat"><div class="stat-label">Daily spending</div><div class="stat-value">$0.00</div></div></div>
+        <div class="stat"><div class="stat-label">Interested activities</div><div class="stat-value">$594.86</div></div></div>
 
         <section class="budget-section" aria-labelledby="flight-budget-title">
           <h3 id="flight-budget-title">Flights</h3>
@@ -1261,89 +1260,15 @@
           <div class="budget-message">All editable activity cost fields are totals for two travelers in USD. Verified ticket prices are displayed in their original provider currency; unconfirmed tour prices are not guessed. Guinness standard entry starts at €48 for two adults. Blarney day-tour pricing and inclusions are unverified; standalone Blarney Castle entry is €48 for two adults.</div>
         </section>
 
-        <section class="budget-section" aria-labelledby="daily-budget-title">
-          <div class="budget-section-heading"><h3 id="daily-budget-title">Daily spending</h3><button type="button" class="budget-clear" id="clear-budget">Clear budget choices</button></div>
-          <p>Add a daily allowance for meals, local transport, and other spending. Selected activity costs assigned to a date appear in that day's total too.</p>
-          <div class="day-spend" id="daily-spend"><div class="day-spend-card">
-          <div class="day-spend-date">Day 1 · March 20</div><div class="day-spend-place">Dublin</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 20 daily spending" data-daily-cost="March 20" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 20">1 interested activity · $86.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 2 · March 21</div><div class="day-spend-place">Dublin</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 21 daily spending" data-daily-cost="March 21" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 21">1 interested activity · $50.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 3 · March 22</div><div class="day-spend-place">Dublin</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 22 daily spending" data-daily-cost="March 22" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 22">1 interested activity · $24.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 4 · March 23</div><div class="day-spend-place">Galway</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 23 daily spending" data-daily-cost="March 23" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 23">0 interested activities · $0.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 5 · March 24</div><div class="day-spend-place">Galway</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 24 daily spending" data-daily-cost="March 24" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 24">1 interested activity · $180.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 6 · March 25</div><div class="day-spend-place">Galway</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 25 daily spending" data-daily-cost="March 25" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 25">1 interested activity · $100.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 7 · March 26</div><div class="day-spend-place">County Mayo</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 26 daily spending" data-daily-cost="March 26" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 26">0 interested activities · $0.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 8 · March 27</div><div class="day-spend-place">County Mayo</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 27 daily spending" data-daily-cost="March 27" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 27">0 interested activities · $0.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 9 · March 28</div><div class="day-spend-place">County Mayo</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 28 daily spending" data-daily-cost="March 28" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 28">0 interested activities · $0.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 10 · March 29</div><div class="day-spend-place">County Mayo</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 29 daily spending" data-daily-cost="March 29" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 29">0 interested activities · $0.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 11 · March 30</div><div class="day-spend-place">Dublin Airport</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 30 daily spending" data-daily-cost="March 30" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 30">0 interested activities · $0.00</div>
-        </div><div class="day-spend-card">
-          <div class="day-spend-date">Day 12 · March 31</div><div class="day-spend-place">Dublin Airport</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="March 31 daily spending" data-daily-cost="March 31" value=""></label>
-          </div>
-          <div class="day-total" data-day-total="March 31">0 interested activities · $0.00</div>
-        </div></div>
+        <section class="budget-section" aria-labelledby="clear-budget-title">
+          <div class="budget-section-heading"><h3 id="clear-budget-title">Reset</h3><button type="button" class="budget-clear" id="clear-budget">Clear budget choices</button></div>
           <div class="budget-message" id="budget-storage-message" role="status" hidden=""></div>
         </section>
       </div>
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:16:06Z">2026-10-28T00:16:06Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:17:07Z">2026-10-28T00:17:07Z</time></p></div>
           <div class="budget-file-save">
             <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
             <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
@@ -2542,24 +2467,6 @@
 
       document.querySelector("#flight-cost").value = budget.flight;
 
-      document.querySelector("#daily-spend").innerHTML = tripDates.map((date) => {
-        const items = itinerary.filter((item) => item.date === date);
-        const places = [...new Set(items.map((item) => item.city).filter((city) => city !== "Travel"))];
-        const stop = routeStops.find((item) => item.id === stopForDate(date));
-        const place = stop?.name || (places.length ? places.join(" / ") : "Travel day");
-        const activitiesForDay = activities.filter((activity) => {
-          const selection = budget.activities[activity.id];
-          return budget.interests.activities[activity.id] === "interested" && selection?.date === date;
-        });
-        return `<div class="day-spend-card">
-          <div class="day-spend-date">${escapeHtml(dayLabel(date))} · ${escapeHtml(date)}</div><div class="day-spend-place">${escapeHtml(place)}</div>
-          <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
-            <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="${escapeHtml(date)} daily spending" data-daily-cost="${escapeHtml(date)}" value="${escapeHtml(budget.daily[date] || "")}"></label>
-          </div>
-          <div class="day-total" data-day-total="${escapeHtml(date)}">${activitiesForDay.length} interested ${activitiesForDay.length === 1 ? "activity" : "activities"} · ${money(activitiesForDay.reduce((sum, activity) => sum + activityAmount(activity), 0))}</div>
-        </div>`;
-      }).join("");
-
       const message = document.querySelector("#budget-storage-message");
       message.hidden = !budgetStorageWarning;
       message.textContent = budgetStorageWarning;
@@ -2574,25 +2481,15 @@
         activityDates.includes(budget.activities[activity.id]?.date)
       );
       const activityTotal = selectedActivities.reduce((sum, activity) => sum + activityAmount(activity), 0);
-      const dailyTotal = tripDates.reduce((sum, date) => sum + budgetNumber(budget.daily[date]), 0);
-      const flightTotal = budgetNumber(budget.flight);
-      const tripTotal = flightTotal + hotelTotal + activityTotal + dailyTotal;
+     const flightTotal = budgetNumber(budget.flight);
+      const tripTotal = flightTotal + hotelTotal + activityTotal;
       document.querySelector("#budget-summary").innerHTML = `
-        <div class="budget-total"><div class="stat-label">Proposed total</div><div class="stat-value">${money(tripTotal)}</div><div class="budget-line-note">Flights + interested hotels + scheduled, interested activities + daily spending</div></div>
+        <div class="budget-total"><div class="stat-label">Proposed total</div><div class="stat-value">${money(tripTotal)}</div><div class="budget-line-note">Flights + interested hotels + scheduled, interested activities</div></div>
         <div class="stat"><div class="stat-label">Flights · 2 people</div><div class="stat-value">${money(flightTotal)}</div></div>
         <div class="stat"><div class="stat-label">Interested hotels</div><div class="stat-value">${money(hotelTotal)}</div></div>
         <div class="stat"><div class="stat-label">Interested activities</div><div class="stat-value">${money(activityTotal)}</div></div>
-        <div class="stat"><div class="stat-label">Daily spending</div><div class="stat-value">${money(dailyTotal)}</div></div>`;
+`;
 
-      tripDates.forEach((date) => {
-        const selected = activities.filter((activity) => {
-          const selection = budget.activities[activity.id];
-          return budget.interests.activities[activity.id] === "interested" && selection?.date === date;
-        });
-        const amount = selected.reduce((sum, activity) => sum + budgetNumber(budget.activities[activity.id].amount), 0);
-        const target = document.querySelector(`[data-day-total="${CSS.escape(date)}"]`);
-        if (target) target.textContent = `${selected.length} interested ${selected.length === 1 ? "activity" : "activities"} · ${money(amount)}`;
-      });
     }
 
     const itineraryItem = (id) => itinerary.find((item) => item.id === id);
@@ -2665,8 +2562,7 @@
         if (adminInput) adminInput.value = input.value;
         renderActivities();
       }
-      if (input.matches("[data-daily-cost]")) budget.daily[input.dataset.dailyCost] = input.value;
-      saveBudget();
+     saveBudget();
       updateBudgetTotals();
     });
     document.querySelector("#admin-panel").addEventListener("input", (event) => {
