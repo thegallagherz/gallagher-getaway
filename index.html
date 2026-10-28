@@ -1343,7 +1343,7 @@
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:12:41Z">2026-10-28T00:12:41Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:16:06Z">2026-10-28T00:16:06Z</time></p></div>
           <div class="budget-file-save">
             <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
             <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
@@ -2386,6 +2386,18 @@
       return `<div class="activity-comparison"><strong>Compared with adjacent activities</strong><span>${neighbors.map(escapeHtml).join("</span><span>")}</span><strong>Compared with your selected stay</strong><span>${escapeHtml(hotelComparison)}</span></div>`;
     }
 
+    function activityTag(activity) {
+      return budget.moduleTags[activity.timelineId || `activity:${activity.id}`] || "";
+    }
+
+    function isUnbudgetedTag(activity) {
+      return ["food", "drinks"].includes(activityTag(activity));
+    }
+
+    function activityAmount(activity) {
+      return isUnbudgetedTag(activity) ? 0 : budgetNumber(budget.activities[activity.id]?.amount);
+    }
+
     function renderAdminPrices() {
       const flightEstimate = document.querySelector("[data-admin-flight-price]");
       if (flightEstimate) flightEstimate.value = budget.flight;
@@ -2395,7 +2407,7 @@
       </div>`).join("");
       document.querySelector("#admin-activity-prices").innerHTML = activities.map((activity) => `<div class="budget-line">
         <div class="admin-price-item"><div class="budget-line-title">${escapeHtml(activity.name)}</div><div class="budget-line-note">${escapeHtml(activity.city)} · Estimate total for two travelers</div></div>
-        <label class="budget-input-wrap">USD $ <input class="budget-input" type="number" min="0" step="0.01" placeholder="Enter estimate" aria-label="${escapeHtml(activity.name)} activity estimate for two travelers in US dollars" data-admin-activity-price="${escapeHtml(activity.id)}" value="${escapeHtml(budget.activities[activity.id]?.amount || "")}"></label>
+        ${isUnbudgetedTag(activity) ? `<span class="budget-line-note">Tagged ${escapeHtml(activityTag(activity))}: not budgeted</span>` : `<label class="budget-input-wrap">USD $ <input class="budget-input" type="number" min="0" step="0.01" placeholder="Enter estimate" aria-label="${escapeHtml(activity.name)} activity estimate for two travelers in US dollars" data-admin-activity-price="${escapeHtml(activity.id)}" value="${escapeHtml(budget.activities[activity.id]?.amount || "")}"></label>`}
       </div>`).join("");
       renderAdminActivityTagChart();
     }
@@ -2523,7 +2535,7 @@
             <select class="budget-day-select" data-budget-activity-date="${escapeHtml(activity.id)}" aria-label="Choose day for ${escapeHtml(activity.name)}">
               ${activityDateOptions(selection.date)}
             </select>
-            <label class="budget-input-wrap">USD $ <input class="budget-input" type="number" min="0" step="0.01" placeholder="Total for 2" aria-label="${escapeHtml(activity.name)} total for two travelers in US dollars" data-budget-activity-cost="${escapeHtml(activity.id)}" value="${escapeHtml(selection.amount)}"></label>
+            ${isUnbudgetedTag(activity) ? `<span class="budget-line-note">Tagged ${escapeHtml(activityTag(activity))}: not budgeted</span>` : `<label class="budget-input-wrap">USD $ <input class="budget-input" type="number" min="0" step="0.01" placeholder="Total for 2" aria-label="${escapeHtml(activity.name)} total for two travelers in US dollars" data-budget-activity-cost="${escapeHtml(activity.id)}" value="${escapeHtml(selection.amount)}"></label>`}
           </div>
         </div>`;
       }).join("") : '<div class="empty-state">No activities to include. Mark an activity Interested to add it back.</div>';
@@ -2544,7 +2556,7 @@
           <div class="day-spend-row"><span class="budget-line-note">Daily spend</span>
             <label class="budget-input-wrap">$ <input class="budget-input" type="number" min="0" step="0.01" placeholder="0.00" aria-label="${escapeHtml(date)} daily spending" data-daily-cost="${escapeHtml(date)}" value="${escapeHtml(budget.daily[date] || "")}"></label>
           </div>
-          <div class="day-total" data-day-total="${escapeHtml(date)}">${activitiesForDay.length} interested ${activitiesForDay.length === 1 ? "activity" : "activities"} · ${money(activitiesForDay.reduce((sum, activity) => sum + budgetNumber(budget.activities[activity.id].amount), 0))}</div>
+          <div class="day-total" data-day-total="${escapeHtml(date)}">${activitiesForDay.length} interested ${activitiesForDay.length === 1 ? "activity" : "activities"} · ${money(activitiesForDay.reduce((sum, activity) => sum + activityAmount(activity), 0))}</div>
         </div>`;
       }).join("");
 
@@ -2561,7 +2573,7 @@
         budget.interests.activities[activity.id] === "interested" &&
         activityDates.includes(budget.activities[activity.id]?.date)
       );
-      const activityTotal = selectedActivities.reduce((sum, activity) => sum + budgetNumber(budget.activities[activity.id].amount), 0);
+      const activityTotal = selectedActivities.reduce((sum, activity) => sum + activityAmount(activity), 0);
       const dailyTotal = tripDates.reduce((sum, date) => sum + budgetNumber(budget.daily[date]), 0);
       const flightTotal = budgetNumber(budget.flight);
       const tripTotal = flightTotal + hotelTotal + activityTotal + dailyTotal;
@@ -2688,6 +2700,8 @@
         budget.moduleTags[input.dataset.moduleTag] = input.value;
         saveBudget();
         renderTimeline();
+        renderBudget();
+        renderAdminPrices();
         renderAdminActivityTagChart();
         return;
       }
