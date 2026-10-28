@@ -53,6 +53,27 @@
     .brand-mark .flag-white { background: #fff; }
     .brand-mark .flag-orange { background: #ff883e; }
     .topbar-note { color: var(--muted); font-size: 12px; }
+    .mode-toggle { background: #e8e5db; border-radius: 999px; display: inline-flex; margin-left: auto; padding: 3px; }
+    .mode-toggle button { background: transparent; border: 0; border-radius: 999px; color: #3f4a43; cursor: pointer; font-size: 12px; font-weight: 700; padding: 7px 13px; }
+    .mode-toggle button[aria-pressed="true"] { background: #245943; color: #fff; }
+    body.mode-ireland .hero, body.mode-ireland .view-tabs { display: none; }
+    .ireland-days { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+    .ireland-days button { background: var(--card); border: 1px solid var(--line); border-radius: 999px; color: #202a25; cursor: pointer; font-size: 12px; padding: 6px 11px; }
+    .ireland-days button[aria-pressed="true"] { background: #245943; border-color: #245943; color: #fff; }
+    .ireland-grid { display: grid; gap: 13px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .ireland-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+    .ireland-card h3 { font-family: Georgia, "Times New Roman", serif; font-size: 18px; font-weight: 500; margin: 0 0 8px; }
+    .ireland-card p { color: #3f4a43; font-size: 13px; line-height: 1.5; margin: 4px 0; }
+    .ireland-wide { grid-column: 1 / -1; }
+    .ireland-item { border-top: 1px solid var(--line); padding: 8px 0; }
+    .ireland-item:first-of-type { border-top: 0; }
+    .ireland-item strong { font-size: 13px; }
+    .ireland-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 10px; }
+    .ireland-actions button { background: #245943; border: 0; border-radius: 10px; color: #fff; cursor: pointer; font-size: 13px; font-weight: 700; padding: 11px 16px; }
+    .ireland-actions button[aria-pressed="true"] { background: #98532f; }
+    .ireland-faq details { border-top: 1px solid var(--line); padding: 8px 0; }
+    .ireland-faq summary { cursor: pointer; font-size: 13px; font-weight: 700; }
+    @media (max-width: 720px) { .ireland-grid { grid-template-columns: 1fr; } }
 
     .shell { margin: 0 auto; max-width: 1180px; padding: 42px 24px 70px; }
     .hero {
@@ -307,6 +328,10 @@
   <header class="topbar">
     <div class="brand"><span class="brand-mark" role="img" aria-label="Irish flag"><span class="flag-green"></span><span class="flag-white"></span><span class="flag-orange"></span></span><span>GALLAGHERS GETAWAY</span></div>
     <div class="topbar-note">A little room for the unexpected</div>
+    <div class="mode-toggle" role="group" aria-label="App mode">
+      <button type="button" id="mode-planning" aria-pressed="true">Planning</button>
+      <button type="button" id="mode-ireland" aria-pressed="false">We’re in Ireland</button>
+    </div>
   </header>
 
   <main class="shell">
@@ -336,6 +361,22 @@
           <button type="button" role="tab" aria-selected="false" data-panel="admin-panel">Admin</button>
           <button type="button" role="tab" aria-selected="false" data-panel="not-interested-panel" id="not-interested-tab">Not interested <span id="not-interested-count">(7)</span></button>
         </div>
+      </div>
+
+      <div id="ireland-panel" class="panel hidden">
+        <div class="timeline-intro">
+          <div class="section-kicker">On the ground</div>
+          <h2 id="ireland-title">We’re in Ireland</h2>
+          <p class="section-subtitle" id="ireland-subtitle"></p>
+        </div>
+        <div class="ireland-days" id="ireland-days" role="group" aria-label="Choose a day"></div>
+        <div class="ireland-actions" role="group" aria-label="Suggestions">
+          <button type="button" data-suggest="do" aria-pressed="false">What should we do next?</button>
+          <button type="button" data-suggest="eat" aria-pressed="false">Where should we eat?</button>
+          <button type="button" data-suggest="pint" aria-pressed="false">Where should we grab a pint?</button>
+        </div>
+        <div class="ireland-card ireland-wide" id="ireland-suggestions" hidden></div>
+        <div class="ireland-grid" id="ireland-content"></div>
       </div>
 
       <div id="timeline-panel" class="panel">
@@ -1277,7 +1318,7 @@
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:21:53Z">2026-10-28T00:21:53Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:27:11Z">2026-10-28T00:27:11Z</time></p></div>
           <div class="budget-file-save">
             <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
             <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
@@ -1498,6 +1539,62 @@
     ];
 
     const activities = [
+      {id:"dublin-epic",city:"Dublin",name:"EPIC The Irish Emigration Museum",category:"Museum · Irish diaspora",description:"Interactive museum telling the story of Irish emigration worldwide, in the CHQ building on the Docklands.",location:"CHQ Building, Custom House Quay, Dublin 1.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"dublin-wicklow-glendalough",city:"Dublin",name:"Wicklow Mountains and Glendalough Day Tour",category:"Day trip",description:"Full-day coach tour to the Wicklow hills, lakes and the monastic site at Glendalough. Check the pickup point and walking time.",location:"Departs central Dublin; visits Co. Wicklow.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"dublin-howth",city:"Dublin",name:"Howth Peninsula Coastal Tour",category:"Half-day coastal outing",description:"Sea cliffs, harbour and seafood on the Howth peninsula north of the city, reachable by DART or tour.",location:"Howth, north Co. Dublin (about 30 minutes by DART).",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"dublin-newgrange",city:"Dublin",name:"Newgrange and Boyne Valley Tour",category:"Day trip · ancient history",description:"Visit the 5,000-year-old passage tomb at Newgrange and nearby Boyne Valley sites. Newgrange entry is by timed visitor-centre tickets.",location:"Departs Dublin; Brú na Bóinne, Co. Meath.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"dublin-giants-causeway",city:"Dublin",name:"Giant’s Causeway and Belfast Day Tour",category:"Long day trip",description:"Very long day trip to Northern Ireland: Belfast, the Causeway Coast and Giant’s Causeway. Likely too much drive time for this trip, but listed as a top Viator seller.",location:"Departs Dublin; Northern Ireland (about 8 to 12 hours).",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"dublin-hop-on-hop-off",city:"Dublin",name:"Dublin Hop-On Hop-Off Bus Tour",category:"City sightseeing bus",description:"Narrated loop of major sights with flexible stops; useful for a first orientation or a rainy afternoon.",location:"Central Dublin loop; stops vary by operator.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"dublin-haunted-walk",city:"Dublin",name:"Haunted Dublin Walking Tour",category:"Evening walking tour",description:"Ghost stories and darker history on an after-dark walk through the old city.",location:"Central Dublin; meeting point varies by operator.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"dublin-glasnevin",city:"Dublin",name:"Glasnevin Cemetery Museum Tour",category:"History · guided tour",description:"Guided tour of Ireland’s national cemetery, resting place of many figures from Irish history, plus a museum.",location:"Finglas Road, Glasnevin, Dublin 11.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"dublin-literary-pub-crawl",city:"Dublin",name:"Dublin Literary Pub Crawl",category:"Evening pub walking tour",description:"Walk the pubs and streets tied to Joyce, Beckett and Behan with actor-guides. Combines a story tour with a few drinks.",location:"Starts in Temple Bar area; confirm meeting point.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"dublin-music-dinner-show",city:"Dublin",name:"Traditional Irish Music, Dance and Dinner Show",category:"Dinner show",description:"Evening of Irish dance, music and a set dinner. A touristy but easy option if you do not want to plan a pub night.",location:"Central Dublin venue varies by operator.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Dublin/d503-ttd"},
+      {id:"galway-inis-mor",city:"Galway",name:"Inis Mór (Aran Islands) Day Tour",category:"Day trip · island",description:"Ferry from Rossaveal to the largest Aran Island with Dun Aonghasa fort and island scenery. Weather-dependent ferry.",location:"Departs Galway; ferry from Rossaveal.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"galway-bay-cruise",city:"Galway",name:"Galway Bay Sightseeing Cruise",category:"Boat trip",description:"Short cruise on Galway Bay for coastline views and wildlife. Check the season and departure point.",location:"Departs near Galway docks or Spanish Arch; confirm with operator.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"galway-food-tour",city:"Galway",name:"Galway Food and Culture Walking Tour",category:"Food tour",description:"Tasting walk through the Latin Quarter, markets and local producers.",location:"Central Galway; meeting point varies by operator.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"galway-clifden-sky-road",city:"Galway",name:"Connemara National Park and Clifden Sky Road Tour",category:"Day trip · scenery",description:"Alternative Connemara route focused on Connemara National Park, Clifden and the Sky Road. Overlaps with the Kylemore day tour, so pick one.",location:"Departs Galway; Connemara, Co. Galway.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"galway-killary-cruise",city:"Galway",name:"Killary Fjord Cruise",category:"Boat trip · scenery",description:"Cruise on Ireland’s glacial fjord on the Galway and Mayo border, often combined with a Connemara tour.",location:"Leenane, Killary Harbour (about 1.25 hours from Galway).",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"galway-trad-pub-crawl",city:"Galway",name:"Galway Traditional Music Pub Crawl",category:"Evening pub tour",description:"Guided trad-session crawl through the Latin Quarter pubs. Another evening-music option besides your Tig Cóilí night.",location:"Central Galway; meeting point varies by operator.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"galway-atlantaquaria",city:"Galway",name:"Galway Atlantaquaria",category:"Attraction · aquarium",description:"Ireland’s national aquarium on Salthill promenade; an easy indoor, wet-weather option.",location:"Claddagh Basin, Galway.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"galway-claddagh",city:"Galway",name:"Claddagh Village and Claddagh Ring Story",category:"Free walk · local history",description:"Short walk to the old fishing village that gave the Claddagh ring its name; pair with the ring museum or jeweller visit.",location:"Claddagh, by Spanish Arch, Galway.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"galway-dunguaire-banquet",city:"Galway",name:"Dunguaire Castle Medieval Banquet",category:"Evening dinner experience",description:"Medieval-style banquet with music in a 16th-century castle at Kinvara. Needs a car or tour transfer.",location:"Kinvara, Co. Galway (about 30 minutes from Galway).",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"galway-burren-poulnabrone",city:"Galway",name:"Burren and Poulnabrone Dolmen Tour",category:"Day trip · landscape",description:"Limestone Burren landscape and the Poulnabrone portal tomb; overlaps with the Cliffs and Aillwee Cave tour, so pick one.",location:"Co. Clare, departs Galway.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/Galway/d5156-ttd"},
+      {id:"mayo-croagh-patrick",city:"County Mayo",name:"Croagh Patrick Climb",category:"Hike · pilgrimage mountain",description:"Ireland’s holy mountain above Clew Bay; roughly 3 to 4 hours round trip on rough scree. Weather and footwear dependent.",location:"Murrisk, near Westport.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"mayo-greenway-bike",city:"County Mayo",name:"Great Western Greenway Bike Ride",category:"Cycling · coastal",description:"Rent bikes or e-bikes on the Westport to Achill traffic-free trail; any section works for a half day.",location:"Starts near Westport; rentals at Newport and Mulranny.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"mayo-achill-keem-bay",city:"County Mayo",name:"Achill Island and Keem Bay Drive",category:"Scenic drive",description:"Ireland’s largest island with cliffs, Keem Bay beach and Atlantic Drive. Best done by car for a day.",location:"Achill Island, about 1 hour from Westport.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"mayo-ashford-castle",city:"County Mayo",name:"Ashford Castle Grounds and Falconry",category:"Estate visit",description:"Visit the castle estate in Cong; falconry and garden walks need advance booking and may be limited to guests.",location:"Cong, Co. Mayo.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"mayo-westport-house",city:"County Mayo",name:"Westport House and Gardens",category:"Historic house",description:"Historic country house and grounds near Clew Bay. Check seasonal opening before going.",location:"Westport, Co. Mayo.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"mayo-ceide-fields",city:"County Mayo",name:"Céide Fields",category:"Heritage site · Stone Age",description:"One of the world’s most extensive Neolithic field systems with a visitor centre above sea cliffs. Far north coast, about 1.5 hours drive.",location:"Ballycastle, north Co. Mayo.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"mayo-doolough-valley",city:"County Mayo",name:"Doolough Valley and Killary Scenic Drive",category:"Scenic drive",description:"Dramatic lakes and mountains south of Westport toward Leenane; good for a relaxed drive.",location:"Doolough Valley, between Louisburgh and Leenane.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"mayo-westport-walking-tour",city:"County Mayo",name:"Westport Walking Tour",category:"Easy-paced town tour",description:"Short guided or self-guided stroll of Westport’s Georgian town design, Mall and quay.",location:"Westport town centre.",priceNote:"Two-person tour price not verified; link opens Viator listings for this area.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"mayo-ballycroy",city:"County Mayo",name:"Ballycroy National Park Visitor Centre",category:"Nature · national park",description:"Bog and mountain park with visitor centre and short walks; quiet and weather-dependent.",location:"Ballycroy, Co. Mayo.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"mayo-foxford-woollen-mills",city:"County Mayo",name:"Foxford Woollen Mills Visitor Centre",category:"Heritage · shopping",description:"Working mill visitor centre with a small museum, shop and café; an easy stop on a drive.",location:"Foxford, Co. Mayo.",priceNote:"Admission not verified; check the official site.",url:"https://www.viator.com/County-Mayo/d5021-ttd"},
+      {id:"dublin-long-hall",city:"Dublin",name:"The Long Hall",category:"Bar · traditional pub",description:"Victorian pub on South Great George’s Street with ornate interior and a classic pint.",location:"51 South Great George’s Street, Dublin 2.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=The%20Long%20Hall%2051%20South%20Great%20George%E2%80%99s%20Street%2C%20Dublin%202."},
+      {id:"dublin-stags-head",city:"Dublin",name:"The Stag’s Head",category:"Bar · traditional pub",description:"Victorian pub with stained glass and dark wood, tucked down an alley off Dame Street.",location:"1 Dame Court, Dublin 2.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=The%20Stag%E2%80%99s%20Head%201%20Dame%20Court%2C%20Dublin%202."},
+      {id:"dublin-mulligans",city:"Dublin",name:"Mulligan’s",category:"Bar · traditional pub",description:"Old-school pub famous for its Guinness, near Poolbeg Street.",location:"8 Poolbeg Street, Dublin 2.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=Mulligan%E2%80%99s%208%20Poolbeg%20Street%2C%20Dublin%202."},
+      {id:"dublin-cobblestone",city:"Dublin",name:"The Cobblestone",category:"Bar · traditional music",description:"Traditional music pub in Smithfield known for nightly sessions.",location:"77 North King Street, Smithfield, Dublin 7.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=The%20Cobblestone%2077%20North%20King%20Street%2C%20Smithfield%2C%20Dublin%207."},
+      {id:"dublin-toners",city:"Dublin",name:"Toner’s Pub",category:"Bar · traditional pub",description:"Historic Baggot Street pub, a short walk from St Stephen’s Green.",location:"139 Baggot Street Lower, Dublin 2.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=Toner%E2%80%99s%20Pub%20139%20Baggot%20Street%20Lower%2C%20Dublin%202."},
+      {id:"galway-taaffes",city:"Galway",name:"Taaffes Bar",category:"Bar · traditional music",description:"Small Shop Street pub with regular traditional music sessions.",location:"19 Shop Street, Galway.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=Taaffes%20Bar%2019%20Shop%20Street%2C%20Galway."},
+      {id:"galway-monroes",city:"Galway",name:"Monroe’s Tavern",category:"Bar · traditional music",description:"Long-running Dominick Street pub with trad sessions and an Irish dance night in season.",location:"14 Dominick Street Lower, Galway.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=Monroe%E2%80%99s%20Tavern%2014%20Dominick%20Street%20Lower%2C%20Galway."},
+      {id:"galway-the-quays",city:"Galway",name:"The Quays Bar",category:"Bar · lively pub",description:"Multi-room Quay Street pub with a medieval-style interior, music and a busy crowd.",location:"Quay Street, Galway.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=The%20Quays%20Bar%20Quay%20Street%2C%20Galway."},
+      {id:"galway-front-door",city:"Galway",name:"The Front Door Pub",category:"Bar · pub and beer garden",description:"Cross Street pub with a big beer garden and lively evenings.",location:"3 Cross Street Upper, Galway.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=The%20Front%20Door%20Pub%203%20Cross%20Street%20Upper%2C%20Galway."},
+      {id:"galway-tig-coili",city:"Galway",name:"Tig Cóilí",category:"Bar · traditional music",description:"Quay Street pub with daily trad sessions. Listed as your evening-music idea; confirm which pub you choose.",location:"Mainguard Street, Galway.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=Tig%20C%C3%B3il%C3%AD%20Mainguard%20Street%2C%20Galway."},
+      {id:"mayo-towers-bar",city:"County Mayo",name:"The Towers Bar",category:"Bar · traditional pub",description:"Popular Westport pub with a local crowd and live music.",location:"Bridge Street, Westport, Co. Mayo.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=The%20Towers%20Bar%20Bridge%20Street%2C%20Westport%2C%20Co.%20Mayo."},
+      {id:"mayo-the-helm",city:"County Mayo",name:"The Helm Bar and Restaurant",category:"Bar · pub and seafood",description:"Quayside pub in Westport with harbour views and food.",location:"The Quay, Westport, Co. Mayo.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=The%20Helm%20Bar%20and%20Restaurant%20The%20Quay%2C%20Westport%2C%20Co.%20Mayo."},
+      {id:"mayo-pat-cohans",city:"County Mayo",name:"Pat Cohan’s Bar",category:"Bar · film-set pub",description:"The pub from The Quiet Man in Cong, a natural stop on the Ashford Castle side.",location:"Main Street, Cong, Co. Mayo.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=Pat%20Cohan%E2%80%99s%20Bar%20Main%20Street%2C%20Cong%2C%20Co.%20Mayo."},
+      {id:"mayo-gieltys",city:"County Mayo",name:"Gielty’s Bar",category:"Bar · island pub",description:"Local pub in Dooagh, Achill Island, near Keem Bay.",location:"Dooagh, Achill Island, Co. Mayo.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=Gielty%E2%80%99s%20Bar%20Dooagh%2C%20Achill%20Island%2C%20Co.%20Mayo."},
+      {id:"mayo-hudsons",city:"County Mayo",name:"Hudson’s Bar",category:"Bar · traditional pub",description:"Local pub in Westport town.",location:"Westport, Co. Mayo.",priceNote:"No admission; drinks are purchased at the venue. Check hours and music nights before visiting.",url:"https://www.google.com/maps/search/?api=1&query=Hudson%E2%80%99s%20Bar%20Westport%2C%20Co.%20Mayo."},
+      {id:"dublin-pigs-ear",city:"Dublin",name:"The Pig’s Ear",category:"Restaurant · modern Irish",description:"Modern Irish dishes in a Georgian townhouse opposite Trinity College.",location:"4 Nassau Street, Dublin 2.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=The%20Pig%E2%80%99s%20Ear%204%20Nassau%20Street%2C%20Dublin%202."},
+      {id:"dublin-fish-shop",city:"Dublin",name:"The Fish Shop",category:"Restaurant · seafood",description:"Casual seafood spot in Benburb Street, Smithfield.",location:"6 Benburb Street, Dublin 7.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=The%20Fish%20Shop%206%20Benburb%20Street%2C%20Dublin%207."},
+      {id:"dublin-delahunt",city:"Dublin",name:"Delahunt",category:"Restaurant · modern Irish",description:"Seasonal Irish tasting-style dining on Camden Street.",location:"39 Camden Street Lower, Dublin 2.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=Delahunt%2039%20Camden%20Street%20Lower%2C%20Dublin%202."},
+      {id:"dublin-bunsen",city:"Dublin",name:"Bunsen",category:"Restaurant · burgers",description:"Simple, quick burger spot with several city centre locations; good for an easy meal.",location:"Central Dublin; several locations.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=Bunsen%20Central%20Dublin%3B%20several%20locations."},
+      {id:"galway-aniar",city:"Galway",name:"Aniar",category:"Restaurant · modern Irish",description:"Michelin-starred tasting restaurant focused on western Irish ingredients. Book well ahead.",location:"53 Dominick Street Lower, Galway.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=Aniar%2053%20Dominick%20Street%20Lower%2C%20Galway."},
+      {id:"galway-mcdonaghs",city:"Galway",name:"McDonagh’s Seafood House",category:"Restaurant · fish and chips",description:"Long-running fishmonger and chipper on Quay Street; casual and good value.",location:"22 Quay Street, Galway.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=McDonagh%E2%80%99s%20Seafood%20House%2022%20Quay%20Street%2C%20Galway."},
+      {id:"galway-kai",city:"Galway",name:"Kai Café and Restaurant",category:"Restaurant · modern Irish",description:"Daytime and evening menus built on local produce in the west end of the city.",location:"22 Sea Road, Galway.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=Kai%20Caf%C3%A9%20and%20Restaurant%2022%20Sea%20Road%2C%20Galway."},
+      {id:"galway-sheridans",city:"Galway",name:"Sheridans on the Docks",category:"Restaurant · cheese and seafood",description:"Cheesemongers with a wine bar and plates, on the docks.",location:"Galway Docks, Galway.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=Sheridans%20on%20the%20Docks%20Galway%20Docks%2C%20Galway."},
+      {id:"mayo-quay-cottage",city:"County Mayo",name:"Quay Cottage",category:"Restaurant · seafood",description:"Seafood restaurant on Westport harbour.",location:"The Harbour, Westport, Co. Mayo.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=Quay%20Cottage%20The%20Harbour%2C%20Westport%2C%20Co.%20Mayo."},
+      {id:"mayo-pantry-corkscrew",city:"County Mayo",name:"The Pantry and Corkscrew",category:"Restaurant · casual Irish",description:"Casual spot in Westport town centre for lunch or dinner.",location:"Westport, Co. Mayo.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=The%20Pantry%20and%20Corkscrew%20Westport%2C%20Co.%20Mayo."},
+      {id:"mayo-reeks-gateway",city:"County Mayo",name:"Croagh Patrick Visitor Centre Café",category:"Restaurant · café",description:"Easy stop for a meal near the foot of Croagh Patrick.",location:"Murrisk, Co. Mayo.",priceNote:"Menu and prices not verified; check hours and book if needed.",url:"https://www.google.com/maps/search/?api=1&query=Croagh%20Patrick%20Visitor%20Centre%20Caf%C3%A9%20Murrisk%2C%20Co.%20Mayo."},
       {id:"opt-001",city:"Dublin",name:"Original Dublin Walking Tour",category:"Easy-paced city tour",description:"Enjoy a relaxed, story-filled stroll through Dublin’s historic streets, with plenty of chances to pause for photos and hear local tales. It is sightseeing rather than a workout; check the meeting point and route before booking.",location:"Dublin city centre; meeting point varies by tour.",proximity:"Potentially close to central Dublin sights; exact overlap is unknown until the operator confirms its meeting point and route.",priceNote:"Two-person tour price not verified.",url:"https://www.viator.com/tours/Dublin/Original-Dublin-Walking-Tour/d503-344886P3?pid=P00009813&uid=U00081553&mcid=58086&currency=USD"},
       {id:"opt-002",city:"Dublin",name:"Old Jameson Distillery Whiskey Tour",category:"Distillery tour",description:"Discover the whiskey-making process and the history of the Old Jameson Distillery in Smithfield. The guided tasting makes this a lively choice for whiskey fans.",location:"Bow St, Smithfield, Dublin 7, D07 N9VH.",proximity:"Separate from the south-side Grafton Street and Dublin Castle cluster; Guinness Storehouse and Pearse Lyons are closer to each other than to this venue.",priceNote:"Two-person tour price not verified.",url:"https://www.viator.com/tours/Dublin/Old-Jameson-Distillery-Whiskey-Tour-in-Dublin/d503-6818OJDDUB15?pid=P00009813&uid=U00081553&mcid=58086&currency=USD"},
       {id:"opt-003",city:"Dublin",name:"Irish Whiskey Museum Experience",category:"Museum · whiskey",description:"Learn how Irish whiskey developed through the centuries in an interactive museum visit on Grafton Street. A guided tasting adds a flavorful finish for adults who choose the tasting option.",location:"119 Grafton Street, Dublin 2, D02 E620.",proximity:"Central and walkable to Dublin Castle and other city-centre sights; a different area from the Guinness/Pearse Lyons cluster.",priceNote:"Two-person tour price not verified.",url:"https://www.viator.com/tours/Dublin/Irish-Whiskey-Museum-Experience/d503-6710WHISKEY?pid=P00009813&uid=U00081553&mcid=58086&currency=USD"},
@@ -2723,6 +2820,116 @@
     renderAdminPrices();
     if (budgetScheduleNeedsMigration || moduleTagsMigrated) saveBudget();
     pullGithubChoices();
+
+    const irelandInfo = {
+      "Dublin": {
+        about: "Ireland’s capital: compact, walkable and busy. Most of the sights on your list are in the city centre, the Liberties and Smithfield, all reachable on foot or a short taxi.",
+        faqs: [
+          ["What currency and tipping?", "Euro. Tip about 10–15% in restaurants if service is not already added; rounding up is fine in pubs and taxis."],
+          ["How do we get around?", "Walk the centre. Dublin Bus, the Luas tram and DART use contactless cards; taxis and ride-share apps work well late at night."],
+          ["Is Temple Bar worth it?", "Fun for a look and live music, but pricey. Locals’ pubs a few streets away are usually cheaper and quieter."],
+          ["Do pubs serve food?", "Many do until about 8–9 p.m.; some, like Matt Molloy’s, do not. Check before you sit down hungry."],
+          ["What about weather?", "Rain can arrive any time in March. Pack a waterproof jacket and comfortable shoes."]
+        ]
+      },
+      "Galway": {
+        about: "A compact, lively west-coast city. The Latin Quarter, Quay Street, the Spanish Arch and Salthill are all walkable, and it is the base for day trips to the Cliffs, Aran Islands and Connemara.",
+        faqs: [
+          ["Do we need a car?", "No for the city. Day tours cover the Cliffs of Moher, Aran Islands and Connemara."],
+          ["Where is the music?", "Quay Street, Shop Street and Dominick Street pubs have trad sessions most nights. Arrive early for a seat."],
+          ["How do we get back to Dublin?", "Direct buses and trains run roughly every hour and take about 2.5 hours; check current times."],
+          ["Do ferries and tours run in March?", "Aran Island ferries and cliff boats can be cancelled for weather. Keep a backup plan and confirm the morning of."],
+          ["What should we wear?", "Layers and a waterproof jacket; it is windy on the coast."]
+        ]
+      },
+      "County Mayo": {
+        about: "Quieter and wilder than the cities: Westport, Clew Bay, Croagh Patrick, Achill and Cong. Distances are longer and a car makes it far easier.",
+        faqs: [
+          ["Do we need a car?", "Yes for most sights beyond Westport town. Remember driving is on the left and country roads can be narrow."],
+          ["Is Westport walkable?", "Yes. The town centre, Mall, quay and pubs are all within a short walk."],
+          ["What time do kitchens close?", "Earlier than in the cities, often 8–9 p.m. Book dinner or confirm hours."],
+          ["Can we climb Croagh Patrick?", "It is a rough 3–4 hour round trip. Skip it in poor visibility or wet, windy weather."],
+          ["Any signal issues?", "Mobile coverage can drop in the hills and on Achill, so download maps offline."]
+        ]
+      }
+    };
+    const irelandCityKey = {dublin:"Dublin", galway:"Galway", mayo:"County Mayo", airport:"Dublin"};
+    let irelandDate = null;
+    let irelandSuggestion = "";
+    const suggestionRules = {
+      "do": {title:"What should we do next?", match:(a) => !/^(bar|restaurant)/i.test(a.category)},
+      "eat": {title:"Where should we eat?", match:(a) => /^restaurant/i.test(a.category)},
+      "pint": {title:"Where should we grab a pint?", match:(a) => /^bar/i.test(a.category)}
+    };
+
+    function irelandToday() {
+      const now = new Date();
+      const label = `${now.toLocaleString("en-US", {month:"long"})} ${now.getDate()}`;
+      return tripDates.includes(label) ? label : tripDates[0];
+    }
+
+    function irelandPicks(kind, city, count) {
+      const rule = suggestionRules[kind];
+      const pool = activities.filter((a) => a.city === city && rule.match(a) && budget.interests.activities[a.id] !== "not-interested");
+      const shuffled = pool.map((a) => [Math.random(), a]).sort((x, y) => x[0] - y[0]).map((x) => x[1]);
+      return shuffled.slice(0, count);
+    }
+
+    function renderSuggestions() {
+      const box = document.querySelector("#ireland-suggestions");
+      document.querySelectorAll("[data-suggest]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.suggest === irelandSuggestion)));
+      if (!irelandSuggestion) { box.hidden = true; return; }
+      const city = irelandCityKey[stopForDate(irelandDate)] || "Dublin";
+      const picks = irelandPicks(irelandSuggestion, city, 4);
+      box.hidden = false;
+      box.innerHTML = `<h3>${escapeHtml(suggestionRules[irelandSuggestion].title)} · ${escapeHtml(city)}</h3>` + (picks.length ? picks.map((a) => `<div class="ireland-item"><strong>${escapeHtml(a.name)}</strong><p>${escapeHtml(a.category)} · ${escapeHtml(a.location || "")}</p><p>${escapeHtml(a.description)}</p>${a.url ? `<p><a href="${escapeHtml(a.url)}" target="_blank" rel="noopener noreferrer">Details / map ↗</a></p>` : ""}</div>`).join("") + '<p><button type="button" class="budget-clear" data-suggest-more="1">Show different picks</button></p>' : "<p>No ideas saved for this area yet.</p>");
+    }
+
+    function renderIreland() {
+      if (!irelandDate) irelandDate = irelandToday();
+      const city = irelandCityKey[stopForDate(irelandDate)] || "Dublin";
+      const info = irelandInfo[city];
+      document.querySelector("#ireland-title").textContent = `We’re in ${city}`;
+      document.querySelector("#ireland-subtitle").textContent = `${dayLabel(irelandDate)} · ${irelandDate}`;
+      document.querySelector("#ireland-days").innerHTML = tripDates.map((date) => `<button type="button" data-ireland-date="${escapeHtml(date)}" aria-pressed="${date === irelandDate}">${escapeHtml(date)}</button>`).join("");
+      const today = itinerary.filter((item) => item.date === irelandDate);
+      const scheduled = activities.filter((a) => budget.interests.activities[a.id] === "interested" && budget.activities[a.id]?.date === irelandDate && !a.timelineId);
+      const stay = hotelForNight(irelandDate);
+      const itemHtml = today.map((item) => `<div class="ireland-item"><strong>${escapeHtml(item.title)}</strong><p>${escapeHtml([item.time, item.place].filter(Boolean).join(" · "))}</p><p>${escapeHtml(item.details || "")}</p></div>`).join("")
+        + scheduled.map((a) => `<div class="ireland-item"><strong>${escapeHtml(a.name)}</strong><p>${escapeHtml(a.category)} · ${escapeHtml(a.location || "")}</p></div>`).join("");
+      document.querySelector("#ireland-content").innerHTML = `
+        <div class="ireland-card ireland-wide"><h3>Today’s plan</h3>${itemHtml || "<p>Nothing planned for this day.</p>"}</div>
+        <div class="ireland-card"><h3>Where you’re staying</h3>${stay ? `<p><strong>${escapeHtml(stay.name)}</strong></p><p>${escapeHtml(stay.location || "")}</p><p>${escapeHtml(stay.dates)}</p>` : "<p>No hotel marked Interested for tonight.</p>"}</div>
+        <div class="ireland-card"><h3>About ${escapeHtml(city)}</h3><p>${escapeHtml(info.about)}</p></div>
+        <div class="ireland-card ireland-wide ireland-faq"><h3>${escapeHtml(city)} FAQs</h3>${info.faqs.map(([q, a]) => `<details><summary>${escapeHtml(q)}</summary><p>${escapeHtml(a)}</p></details>`).join("")}</div>`;
+      renderSuggestions();
+    }
+
+    function setMode(mode) {
+      const inIreland = mode === "ireland";
+      document.body.classList.toggle("mode-ireland", inIreland);
+      document.querySelector("#mode-planning").setAttribute("aria-pressed", String(!inIreland));
+      document.querySelector("#mode-ireland").setAttribute("aria-pressed", String(inIreland));
+      try { localStorage.setItem("gallagher-getaway-mode", mode); } catch (error) {}
+      if (inIreland) {
+        document.querySelectorAll(".panel").forEach((panel) => panel.classList.toggle("hidden", panel.id !== "ireland-panel"));
+        renderIreland();
+      } else {
+        const active = document.querySelector('[role="tab"][aria-selected="true"]') || document.querySelector('[role="tab"][data-panel="timeline-panel"]');
+        active.click();
+      }
+    }
+
+    document.querySelector("#mode-planning").addEventListener("click", () => setMode("planning"));
+    document.querySelector("#mode-ireland").addEventListener("click", () => setMode("ireland"));
+    document.querySelector("#ireland-panel").addEventListener("click", (event) => {
+      const dateButton = event.target.closest("[data-ireland-date]");
+      const suggest = event.target.closest("[data-suggest]");
+      if (dateButton) { irelandDate = dateButton.dataset.irelandDate; renderIreland(); }
+      else if (suggest) { irelandSuggestion = irelandSuggestion === suggest.dataset.suggest ? "" : suggest.dataset.suggest; renderSuggestions(); }
+      else if (event.target.closest("[data-suggest-more]")) renderSuggestions();
+    });
+    try { if (localStorage.getItem("gallagher-getaway-mode") === "ireland") setMode("ireland"); } catch (error) {}
   </script>
 
 
