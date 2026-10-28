@@ -140,8 +140,8 @@
     .event-remove-button:hover { background: var(--orange-pale); }
     .event-drag-handle { color: #88948b; font-size: 14px; letter-spacing: -3px; padding-right: 3px; user-select: none; }
     .event-accent { background: #cbd0c8; border-radius: 9px; }
-    .event[data-city="dublin"] .event-accent { background: #6fa8d6; }
-    .event[data-city="galway"] .event-accent { background: #a88bd0; }
+    .event[data-city="dublin"] .event-accent { background: #e9a46a; }
+    .event[data-city="galway"] .event-accent { background: #b7d3bf; }
     .event[data-city="mayo"] .event-accent { background: #a3a9b0; }
     .event[data-tag="leisure time"] { background: #f1f8f3; border-color: #b8d5c2; }
     .event[data-tag="food"] { background: #fff5ef; border-color: #edc1aa; }
@@ -243,8 +243,12 @@
     .event[data-tag="travel"] { background: #edf3f7; border-color: #c3d2db; }
     .event[data-tag="drinks"] { background: #f4f1f7; border-color: #d6cbe2; }
     .event[data-tag="ticketed activity"] { background: #eff4f5; border-color: #c4d6dc; }
-    .event[data-city="dublin"] { background: #e6f1fb; border-color: #bcd6ee; }
-    .event[data-city="galway"] { background: #f0eafa; border-color: #d3c4ea; }
+    .event[data-city="dublin"] { background: #fde6d0; border-color: #f0c39b; }
+    .event[data-city="galway"] { background: #3f6b50; border-color: #2f5440; color: #fff; }
+    .event[data-city="galway"] .event-details, .event[data-city="galway"] .event-time, .event[data-city="galway"] .event-city, .event[data-city="galway"] .category, .event[data-city="galway"] .event-schedule { color: #e3efe7; }
+    .event[data-city="galway"] .event-drag-handle { color: #cfe3d6; }
+    .event[data-city="galway"] .event-order-button { border-color: #86a893; color: #e3efe7; }
+    .event[data-city="galway"] .free-time-choice { color: #fff; }
     .event[data-city="mayo"] { background: #eef0f2; border-color: #cfd3d8; }
     .event-tag-select, .event-schedule select, .activity-schedule select, .budget-input, .budget-day-select {
       background-color: #fffefa; color: var(--ink);
@@ -1268,7 +1272,7 @@
 
       <div id="admin-panel" class="panel hidden">
         <div class="section-heading">
-          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:17:07Z">2026-10-28T00:17:07Z</time></p></div>
+          <div><div class="section-kicker">Manage estimates</div><h2>Admin price estimates</h2><p class="section-subtitle">Enter hotel totals per stay and activity totals for two travelers in USD. Changes update the budget and save with your trip choices.</p><p class="section-subtitle" id="last-published">Last published: <time id="last-published-time" datetime="2026-10-28T00:20:20Z">2026-10-28T00:20:20Z</time></p></div>
           <div class="budget-file-save">
             <button type="button" class="budget-save-file" id="connect-github">Connect GitHub to save</button>
             <span class="budget-file-status" id="trip-file-status" role="status">Loading shared trip choices…</span>
